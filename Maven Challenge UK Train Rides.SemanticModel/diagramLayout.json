@@ -29,10 +29,11 @@
           "nodeIndex": "DimJourney",
           "nodeLineageTag": "9ba5466a-a56d-4ef2-bf8e-f698e7d4c4ec",
           "size": {
-            "height": 176,
+            "height": 104,
             "width": 234
           },
-          "zIndex": 2
+          "zIndex": 2,
+          "expandedHeight": 176
         },
         {
           "location": {
@@ -42,10 +43,11 @@
           "nodeIndex": "DimPayment",
           "nodeLineageTag": "91c32e5d-f838-4aeb-8fc8-cf91127f86c8",
           "size": {
-            "height": 152,
+            "height": 104,
             "width": 234
           },
-          "zIndex": 3
+          "zIndex": 3,
+          "expandedHeight": 152
         },
         {
           "location": {
@@ -71,7 +73,8 @@
             "height": 104,
             "width": 234
           },
-          "zIndex": 5
+          "zIndex": 5,
+          "expandedHeight": 104
         },
         {
           "location": {

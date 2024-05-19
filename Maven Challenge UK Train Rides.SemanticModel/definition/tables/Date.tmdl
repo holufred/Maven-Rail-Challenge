@@ -79,6 +79,9 @@ table Date
 		lineageTag: 3c2f669f-53b7-44ec-ab92-d16470ec9b4d
 		summarizeBy: none
 		sourceColumn: Month Name
+		sortByColumn: Month
+
+		changedProperty = SortByColumn
 
 		annotation SummarizationSetBy = Automatic
 
@@ -108,7 +111,7 @@ table Date
 				      StartDate = List.Min(#"Railway"[Date of Purchase]),
 				      
 				      // Create a list of dates from the start date until today
-				      DateList = List.Dates(StartDate, Number.From(List.Max(#"Railway"[Date of Purchase])) - Number.From(StartDate)+1, #duration(1,0,0,0)),
+				      DateList = List.Dates(StartDate, Number.From(List.Max(#"Railway"[Date of Journey])) - Number.From(StartDate)+1, #duration(1,0,0,0)),
 				      
 				      // Convert the list to columnar table
 				      ListToTable = Table.FromList(DateList, Splitter.SplitByNothing(), null, null, ExtraValues.Error),

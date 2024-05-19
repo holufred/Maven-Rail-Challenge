@@ -43,6 +43,28 @@ table Time
 
 		annotation PBI_FormatHint = {"isDateTimeCustom":true}
 
+	column '1 hour bucket'
+		dataType: int64
+		formatString: 0
+		lineageTag: 23d5fc59-c28b-437b-ab51-1fb6c491a0f4
+		summarizeBy: none
+		sourceColumn: 1 hour bucket
+
+		annotation SummarizationSetBy = Automatic
+
+	column '1 hour time slot'
+		dataType: dateTime
+		formatString: h:nn
+		lineageTag: ff79b4e8-e660-4c5b-b372-1232393c548b
+		summarizeBy: none
+		sourceColumn: 1 hour time slot
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
 	partition Time = m
 		mode: import
 		source =
@@ -55,9 +77,12 @@ table Time
 				    #"Changed Type" = Table.TransformColumnTypes(#"Inserted Division",{{"Time to the Minute", type time}}),
 				    #"Inserted Integer-Division" = Table.AddColumn(#"Changed Type", "30 mins bucket", each Number.IntegerDivide([Minutes], 30), Int64.Type),
 				    #"Added Custom" = Table.AddColumn(#"Inserted Integer-Division", "30 mins time slot", each [30 mins bucket]*30/1440),
-				    #"Changed Type2" = Table.TransformColumnTypes(#"Added Custom",{{"30 mins time slot", type time}})
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Added Custom",{{"30 mins time slot", type time}}),
+				    #"Inserted Integer-Division1" = Table.AddColumn(#"Changed Type2", "1 hour bucket", each Number.IntegerDivide([Minutes], 60), Int64.Type),
+				    #"Added Custom1" = Table.AddColumn(#"Inserted Integer-Division1", "1 hour time slot", each [1 hour bucket]*60/1440),
+				    #"Changed Type3" = Table.TransformColumnTypes(#"Added Custom1",{{"1 hour time slot", type time}})
 				in
-				    #"Changed Type2"
+				    #"Changed Type3"
 
 	annotation PBI_NavigationStepName = Navigation
 

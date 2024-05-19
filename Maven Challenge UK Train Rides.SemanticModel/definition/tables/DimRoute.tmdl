@@ -18,6 +18,16 @@ table DimRoute
 
 		annotation SummarizationSetBy = Automatic
 
+	column Direction
+		dataType: string
+		lineageTag: a8277c2c-ff1c-482c-93b6-40ca9dd7b202
+		summarizeBy: none
+		sourceColumn: Direction
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
 	partition DimRoute = m
 		mode: import
 		source =
@@ -27,7 +37,8 @@ table DimRoute
 				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
 				    SplitColumn = Table.SplitColumn(#"Removed Duplicates", "Route", Splitter.SplitTextByDelimiter(" - ", QuoteStyle.Csv), {"Part1", "Part2"}),
 				    AddSortedRoute = Table.AddColumn(SplitColumn, "Journey Route", each Text.Combine(List.Sort({[Part1], [Part2]}), " - "), type text),
-				    #"Merged Columns" = Table.CombineColumns(AddSortedRoute,{"Part1", "Part2"},Combiner.CombineTextByDelimiter(" - ", QuoteStyle.None),"Route")
+				    AddDirectionColumn = Table.AddColumn(AddSortedRoute, "Direction", each if Text.Start([Journey Route], Text.Length([Part1])) = [Part1] then "To" else "Fro", type text),
+				    #"Merged Columns" = Table.CombineColumns(AddDirectionColumn,{"Part1", "Part2"},Combiner.CombineTextByDelimiter(" - ", QuoteStyle.None),"Route")
 				in
 				    #"Merged Columns"
 

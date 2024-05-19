@@ -7,7 +7,7 @@ table _Measures
 		formatString: #,0
 		lineageTag: 2680a762-037e-484a-9ebb-1d046a35777e
 
-	measure 'Top Routes' =
+	measure 'Top Routes' = ```
 			
 			VAR _top =
 			CALCULATE(
@@ -15,7 +15,9 @@ table _Measures
 			    KEEPFILTERS(
 			        TOPN(
 			            [Top Routes Value],
-			            ALLSELECTED(DimRoute[Journey Route]),
+			            ALLSELECTED(DimRoute[Journey Route] ),
+			            CALCULATE([Journey Count], ALLSELECTED(DimRoute[Direction])),
+			            DESC,
 			            [Journey Count],
 			            DESC,
 			            DimRoute[Journey Route],
@@ -29,10 +31,12 @@ table _Measures
 			    KEEPFILTERS(
 			        TOPN(
 			            [Top Routes Value],
-			            FILTER(ALLSELECTED(DimRoute[Journey Route]), NOT ISBLANK([Journey Count])),
+			            ALLSELECTED(DimRoute[Journey Route], DimRoute[Direction]),
+			            CALCULATE([Journey Count], ALLSELECTED(DimRoute[Direction])),
+			            ASC, 
 			            [Journey Count],
-			            ASC,
-			            RAND(),
+			            ASC,                    
+			            DimRoute[Journey Route],
 			            ASC
 			        )
 			    )
@@ -42,6 +46,7 @@ table _Measures
 			
 			RETURN
 			    _Result
+			```
 		formatString: 0
 		lineageTag: 287539a1-9c78-4e5d-a1a8-134ee4c93249
 
@@ -86,8 +91,9 @@ table _Measures
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 76983613-ff94-4d72-aec8-85b0bef68cda
 
-	measure 'Top Cancelled Routes' =
+	measure 'Top Cancelled Routes' = ```
 			
+			VAR _top =
 			CALCULATE(
 			    [Journey Count],
 			    KEEPFILTERS(
@@ -103,6 +109,27 @@ table _Measures
 			        )
 			    )
 			)
+			VAR _bottom =
+			CALCULATE(
+			    [Journey Count],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            ALLSELECTED(DimRoute[Journey Route]),
+			            [Cancellation Percentage],
+			            ASC,
+			            CALCULATE([Cancellation Percentage], ALLSELECTED(DimJourney)),            
+			            ASC,
+			            DimRoute[Journey Route],
+			            ASC
+			        )
+			    )
+			)
+			VAR _Result =
+			    IF(SELECTEDVALUE(TopBottom[Order]) ="Top", _top, _bottom)
+			RETURN
+			    _Result
+			```
 		formatString: 0
 		lineageTag: 57e788ea-3dbc-4eed-9ee7-fc92e723705f
 
@@ -126,6 +153,7 @@ table _Measures
 
 	measure 'Top Delayed Routes' =
 			
+			VAR _top =
 			CALCULATE(
 			    [Journey Count],
 			    KEEPFILTERS(
@@ -141,6 +169,27 @@ table _Measures
 			        )
 			    )
 			)
+			VAR _bottom =
+			CALCULATE(
+			    [Journey Count],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            ALLSELECTED(DimRoute[Journey Route]),
+			            CALCULATE([Delayed Percentage], ALLSELECTED(DimJourney)),
+			            ASC,
+			            [Delayed Percentage],
+			            ASC,
+			            DimRoute[Journey Route],
+			            ASC
+			        )
+			    )
+			)
+			
+			VAR _Result =
+			    IF(SELECTEDVALUE(TopBottom[Order]) ="Top", _top, _bottom)
+			RETURN
+			    _Result
 		formatString: 0
 		lineageTag: 595e788f-8d87-4c2f-96d6-01638ba30acc
 
@@ -204,6 +253,247 @@ table _Measures
 		lineageTag: b8da3aee-4150-4dcb-b017-34520244b2ca
 
 		formatStringDefinition = "0 minutes"
+
+	measure 'Cancelled Journeys' =
+			
+			CALCULATE(
+			    COUNTROWS(Railway),
+			    DimJourney[Journey Status] = "Cancelled"
+			)
+		formatString: #,0
+		lineageTag: 6dd6cd97-d2e1-4c0e-90d4-397c4b207099
+
+	measure 'Delayed Journeys' =
+			
+			CALCULATE(
+			    COUNTROWS(Railway),
+			    DimJourney[Journey Status] = "Delayed"
+			)
+		formatString: #,0
+		lineageTag: 795a85a6-0916-4423-8c88-95d9b3eadfc7
+
+	measure 'PM Trips' =
+			
+			CALCULATE(
+			    [Journey Count],
+			    DATEADD('Date'[Date], -1,MONTH))
+		formatString: #,0
+		lineageTag: 6031f9a8-35c4-4da0-bae2-c7b150f2dfd2
+
+	measure 'Percentage Difference (Trips)' =
+			
+			VAR up_arrow = UNICHAR(129137)
+			VAR down_arrow = UNICHAR(129139)
+			VAR _current = [Journey Count]
+			VAR _previous = [PM Trips]
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+		displayFolder: Percentage Difference
+		lineageTag: 84882774-b32c-409e-8236-3acace3422de
+
+	measure 'Percentage Difference (Cancelled Trips)' =
+			
+			VAR up_arrow = UNICHAR(129137)
+			VAR down_arrow = UNICHAR(129139)
+			VAR _current = [Cancelled Journeys]
+			VAR _previous = CALCULATE([Cancelled Journeys], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+		displayFolder: Percentage Difference
+		lineageTag: aa6c955f-27ce-420a-95f4-7e6deaa6796c
+
+	measure 'Percentage Difference (Delayed Trips)' =
+			
+			VAR up_arrow = UNICHAR(129137)
+			VAR down_arrow = UNICHAR(129139)
+			VAR _current = [Delayed Journeys]
+			VAR _previous = CALCULATE([Delayed Journeys], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+		displayFolder: Percentage Difference
+		lineageTag: 91c1bf24-d44b-484a-b5a9-7a1bb23b4ba4
+
+	measure 'Percentage Difference (Delay Time)' =
+			
+			VAR up_arrow = UNICHAR(129137)
+			VAR down_arrow = UNICHAR(129139)
+			VAR _current = [Average Delay Time]
+			VAR _previous = CALCULATE([Average Delay Time], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+		displayFolder: Percentage Difference
+		lineageTag: b07266a1-b718-4d48-82ca-45423c1374b9
+
+	measure 'Refunded Journeys' =
+			
+			CALCULATE(
+			    COUNTROWS(Railway),
+			    DimJourney[Refund] = "Yes"
+			)
+		formatString: #,0
+		lineageTag: 852b4598-d052-41e6-b011-5fa7ad9124f5
+
+	measure 'Percentage Difference (Refunded Journey)' =
+			
+			VAR up_arrow = UNICHAR(129137)
+			VAR down_arrow = UNICHAR(129139)
+			VAR _current = [Refunded Journeys]
+			VAR _previous = CALCULATE([Refunded Journeys], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+		displayFolder: Percentage Difference
+		lineageTag: 891129be-12f2-4c38-b301-85e470070ede
+
+	measure 'PM Ticket Sales' =
+			
+			CALCULATE(
+			    [Total Ticket Booked],
+			    DATEADD('Date'[Date], -1,MONTH)
+			)
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: bb5604c7-739c-444a-853c-1b93607787e1
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	measure 'Percentage Difference (Ticket Sales)' =
+			
+			VAR up_arrow = UNICHAR(129137)
+			VAR down_arrow = UNICHAR(129139)
+			VAR _current = [Total Ticket Booked]
+			VAR _previous = CALCULATE([Total Ticket Booked], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+		displayFolder: Percentage Difference
+		lineageTag: f0b35933-e9fe-4c9f-82f7-1ab2a9236e1c
+
+	measure 'Percentage Difference (Refunded Sales)' =
+			
+			VAR up_arrow = UNICHAR(129137)
+			VAR down_arrow = UNICHAR(129139)
+			VAR _current = [Total Ticket Refunded]
+			VAR _previous = CALCULATE([Total Ticket Refunded], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+		displayFolder: Percentage Difference
+		lineageTag: 64e13c9c-90e0-4109-9c3e-0492fe8fcfc2
+
+	measure 'Percentage Difference (Net Sales)' =
+			
+			VAR up_arrow = UNICHAR(129137)
+			VAR down_arrow = UNICHAR(129139)
+			VAR _current = [Total Ticket Net]
+			VAR _previous = CALCULATE([Total Ticket Net], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+		displayFolder: Percentage Difference
+		lineageTag: 76570474-5a22-426a-9569-c4a118494b6a
+
+	measure 'Percentage Colour (Trips)' =
+			
+			VAR _current = [Journey Count]
+			VAR _previous = [PM Trips]
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			    IF( _growth <0, "red", "green")
+		displayFolder: Percentage Difference\Percentage Colour
+		lineageTag: c4bd59e8-8ed8-4163-ae9b-ab64b976aa79
+
+	measure 'Percentage Colour (Cancelled Trips)' =
+			
+			VAR _current = [Cancelled Journeys]
+			VAR _previous = CALCULATE([Cancelled Journeys], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			     IF( _growth <0, "red", "green")
+		displayFolder: Percentage Difference\Percentage Colour
+		lineageTag: cc0b4a8d-ae18-4d61-9827-c5b2fb1a3753
+
+	measure 'Percentage Colour (Delayed Trips)' =
+			VAR _current = [Delayed Journeys]
+			VAR _previous = CALCULATE([Delayed Journeys], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			     IF( _growth <0, "red", "green")
+		displayFolder: Percentage Difference\Percentage Colour
+		lineageTag: d433223e-e602-4675-aab6-c299f1f6cbf8
+
+	measure 'Percentage Colour (Delay Time)' =
+			VAR _current = [Average Delay Time]
+			VAR _previous = CALCULATE([Average Delay Time], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			     IF( _growth <0, "red", "green")
+		displayFolder: Percentage Difference\Percentage Colour
+		lineageTag: f76fe76d-6a5c-419f-b81b-97dbc9062db6
+
+	measure 'Percentage Colour (Refunded Journey)' =
+			VAR _current = [Refunded Journeys]
+			VAR _previous = CALCULATE([Refunded Journeys], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			     IF( _growth <0, "red", "green")
+		displayFolder: Percentage Difference\Percentage Colour
+		lineageTag: 99ff6026-162b-4a76-a989-dca5b81e70f5
+
+	measure 'Percentage Colour (Ticket Sales)' =
+			VAR _current = [Total Ticket Booked]
+			VAR _previous = CALCULATE([Total Ticket Booked], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			     IF( _growth <0, "red", "green")
+		displayFolder: Percentage Difference\Percentage Colour
+		lineageTag: 1b3040a9-b891-4e57-a2d7-6acd2e2f7cea
+
+	measure 'Percentage Colour (Refunded Sales)' =
+			VAR _current = [Total Ticket Refunded]
+			VAR _previous = CALCULATE([Total Ticket Refunded], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			     IF( _growth <0, "red", "green")
+		displayFolder: Percentage Difference\Percentage Colour
+		lineageTag: 79fdb720-91f5-420e-ac4c-8b70a5fc97cf
+
+	measure 'Percentage Colour (Net Sales)' =
+			VAR _current = [Total Ticket Net]
+			VAR _previous = CALCULATE([Total Ticket Net], DATEADD('Date'[Date], -1,MONTH))
+			VAR _growth = DIVIDE (_current - _previous, _previous,0)
+			RETURN
+			     IF( _growth <0, "red", "green")
+		displayFolder: Percentage Difference\Percentage Colour
+		lineageTag: 0f0d706a-8b75-4deb-9d8e-18197cf5383f
+
+	measure 'Popular Route Chart Title' =
+			
+			COMBINEVALUES(" ", SELECTEDVALUE(TopBottom[Order]),[Top Routes Value], "Popular Routes")
+		lineageTag: 2d1f6e0b-bf2c-4063-9a70-2ae0b30c0dc2
+
+	measure 'Sales Label' =
+			
+			IF (
+			    [Total Ticket Booked]> [PM Ticket Sales],
+			    [Total Ticket Booked],
+			    [PM Ticket Sales]
+			)
+		formatString: 0
+		lineageTag: b554dd29-39d1-40d1-8dd4-20e1a916e280
+
+	measure 'Cancelled Route Chart Title' =
+			
+			COMBINEVALUES(" ", SELECTEDVALUE(TopBottom[Order]),[Top Routes Value], "Cancelled Routes")
+		lineageTag: 6717a0e8-153f-4888-8989-174f5183fc4e
+
+	measure 'Delayed Route Chart Title' =
+			
+			COMBINEVALUES(" ", SELECTEDVALUE(TopBottom[Order]),[Top Routes Value], "Delayed Routes")
+		lineageTag: e101ef37-43c1-49d3-a1e4-e6503ab92d0e
 
 	partition _Measures = m
 		mode: import

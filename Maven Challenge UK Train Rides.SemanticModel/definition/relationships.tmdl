@@ -28,11 +28,11 @@ relationship 131860cb-1d08-46b1-bf7a-5938358edf31
 	toColumn: DimStation.Station
 
 relationship 8767aecf-d93a-4fc3-9700-153084c3a338
+	isActive: false
 	fromColumn: Railway.'Time of Purchase'
 	toColumn: Time.'Time to the Minute'
 
 relationship 861b242b-4a71-4c3f-a848-c1c6d0f76f79
-	isActive: false
 	fromColumn: Railway.'Departure Time'
 	toColumn: Time.'Time to the Minute'
 
@@ -47,11 +47,11 @@ relationship 95f45c0b-800a-4190-be82-35b1321c1610
 	toColumn: Time.'Time to the Minute'
 
 relationship 1e74dc5e-be48-4b47-a19e-0934ab1b4075
+	isActive: false
 	fromColumn: Railway.'Date of Purchase'
 	toColumn: Date.Date
 
 relationship 5e78f00e-958f-4dac-aee0-fa1afca66fd6
-	isActive: false
 	fromColumn: Railway.'Date of Journey'
 	toColumn: Date.Date
 
