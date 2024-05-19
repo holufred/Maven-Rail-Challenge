@@ -1,0 +1,219 @@
+table _Measures
+	lineageTag: 9de6a2ca-f66a-4e57-8498-7cc90ab61324
+
+	measure 'Journey Count' =
+			
+			CALCULATE(COUNTROWS(Railway))
+		formatString: #,0
+		lineageTag: 2680a762-037e-484a-9ebb-1d046a35777e
+
+	measure 'Top Routes' =
+			
+			VAR _top =
+			CALCULATE(
+			    [Journey Count],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            ALLSELECTED(DimRoute[Journey Route]),
+			            [Journey Count],
+			            DESC,
+			            DimRoute[Journey Route],
+			            DESC
+			        )
+			    )
+			)
+			VAR _bottom=
+			CALCULATE(
+			    [Journey Count],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            FILTER(ALLSELECTED(DimRoute[Journey Route]), NOT ISBLANK([Journey Count])),
+			            [Journey Count],
+			            ASC,
+			            RAND(),
+			            ASC
+			        )
+			    )
+			)
+			VAR _Result =
+			    IF(SELECTEDVALUE(TopBottom[Order]) ="Top", _top, _bottom)
+			
+			RETURN
+			    _Result
+		formatString: 0
+		lineageTag: 287539a1-9c78-4e5d-a1a8-134ee4c93249
+
+	measure 'Peak Travel Times' =
+			
+			CALCULATE(
+			    [Journey Count],
+			    USERELATIONSHIP('Time'[Time to the Minute], Railway[Departure Time])
+			)
+		formatString: 0
+		lineageTag: 3eec4a8a-a38e-496e-a4c9-34b5f7a5ecb4
+
+	measure 'Peak Travel Times Conditional Formatting' = ```
+			
+			VAR TimeSlotRanking = 
+			CALCULATE(RANKX(
+			    ALLSELECTED('Time'[30 mins time slot]),
+			    [Peak Travel Times],
+			    ,
+			    DESC
+			))
+			RETURN
+			IF(TimeSlotRanking <= 3, "Red", "LightBlue")
+			
+			```
+		lineageTag: 9996f139-37c6-46fb-aeb2-35cf6f1f3778
+
+	measure 'Cancellation Percentage' = ```
+			
+			VAR CancelledJourneys = 
+			CALCULATE(
+			    COUNTROWS(Railway),
+			    DimJourney[Journey Status] = "Cancelled"
+			)
+			RETURN
+			DIVIDE(
+			    CancelledJourneys,
+			    [Journey Count],
+			    0
+			)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 76983613-ff94-4d72-aec8-85b0bef68cda
+
+	measure 'Top Cancelled Routes' =
+			
+			CALCULATE(
+			    [Journey Count],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            ALLSELECTED(DimRoute[Journey Route]),
+			            CALCULATE([Cancellation Percentage], ALLSELECTED(DimJourney)),
+			            DESC,
+			            [Cancellation Percentage],
+			            DESC,
+			            DimRoute[Journey Route],
+			            DESC
+			        )
+			    )
+			)
+		formatString: 0
+		lineageTag: 57e788ea-3dbc-4eed-9ee7-fc92e723705f
+
+	measure 'Delayed Percentage' = ```
+			
+			VAR DelayedJourneys = 
+			CALCULATE(
+			    COUNTROWS(Railway),
+			    DimJourney[Journey Status] = "Delayed"
+			)
+			RETURN
+			DIVIDE(
+			    DelayedJourneys,
+			    [Journey Count],
+			    0
+			)
+			```
+		lineageTag: 38643d20-7fc8-4e05-b572-e3919fe2c211
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Top Delayed Routes' =
+			
+			CALCULATE(
+			    [Journey Count],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            ALLSELECTED(DimRoute[Journey Route]),
+			            CALCULATE([Delayed Percentage], ALLSELECTED(DimJourney)),
+			            DESC,
+			            [Delayed Percentage],
+			            DESC,
+			            DimRoute[Journey Route],
+			            DESC
+			        )
+			    )
+			)
+		formatString: 0
+		lineageTag: 595e788f-8d87-4c2f-96d6-01638ba30acc
+
+	measure 'Average Number of Trips by Day of Week' =
+			
+			AVERAGEX(
+			    VALUES('Date'[Date]),
+			    [Journey Count]
+			)
+		formatString: 0
+		lineageTag: c4b790da-a3c4-4b83-b193-e782488c2b92
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Average Number of Trips by Time' =
+			
+			AVERAGEX(
+			    VALUES('Time'[Time to the Minute]),
+			    [Journey Count]
+			)
+		lineageTag: cd4c2fe2-acd5-4e99-90c8-33f061d5aa20
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Ticket Booked' =
+			
+			CALCULATE(SUM(Railway[Price]))
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 09ceb4c5-08c1-4a1f-9feb-acf605d75ed5
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	measure 'Total Ticket Refunded' =
+			
+			CALCULATE(
+			    [Total Ticket Booked],
+			    DimJourney[Refund] = "Yes"
+			)
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 8e9c83cc-3e20-4b70-b1ea-ab7583ce79bd
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	measure 'Total Ticket Net' =
+			
+			[Total Ticket Booked] - [Total Ticket Refunded]
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 43b6b411-e2af-425e-9955-427c592c7fc3
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	measure 'Average Delay Time' =
+			
+			VAR _Result =
+			AVERAGEX(
+			    VALUES(Railway[Transaction ID]),
+			    SUM(Railway[Late Arrival Duration])
+			)
+			RETURN
+			    IF(_Result = BLANK(), 0,_Result)
+		lineageTag: b8da3aee-4150-4dcb-b017-34520244b2ca
+
+		formatStringDefinition = "0 minutes"
+
+	partition _Measures = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Column1"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_ResultType = Table
+

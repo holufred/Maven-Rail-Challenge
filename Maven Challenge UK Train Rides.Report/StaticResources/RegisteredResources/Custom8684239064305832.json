@@ -1,0 +1,26 @@
+{
+  "name": "Custom",
+  "textClasses": {
+    "label": {
+      "fontFace": "Georgia"
+    },
+    "callout": {
+      "fontFace": "Georgia",
+      "fontSize": 30
+    },
+    "title": {
+      "fontFace": "Georgia",
+      "fontSize": 10
+    }
+  },
+  "dataColors": [
+    "#000000",
+    "#DCE3F6",
+    "#FF5C69",
+    "#6B007B",
+    "#E044A7",
+    "#744EC2",
+    "#D9B300",
+    "#D64550"
+  ]
+}

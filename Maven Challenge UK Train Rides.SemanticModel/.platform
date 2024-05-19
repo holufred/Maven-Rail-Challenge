@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Maven Challenge UK Train Rides"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "74ee0b04-05d0-4b4c-bdd7-cbc3e9e2064d"
+  }
+}
