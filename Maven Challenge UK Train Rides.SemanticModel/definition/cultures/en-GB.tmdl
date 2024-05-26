@@ -5691,7 +5691,7 @@ culture en-GB
 			          }
 			        },
 			        {
-			          "Trips from Station": {
+			          "Number of Trips": {
 			            "State": "Suggested",
 			            "Source": {
 			              "Type": "External",
@@ -5701,7 +5701,7 @@ culture en-GB
 			          }
 			        },
 			        {
-			          "Number of Trips": {
+			          "Trips from Station": {
 			            "State": "Suggested",
 			            "Source": {
 			              "Type": "External",
@@ -8374,19 +8374,7 @@ culture en-GB
 			          "ConceptualProperty": "Total Revenue Previous Month"
 			        }
 			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "Revenue PM": {
-			            "State": "Suggested",
-			            "Source": {
-			              "Type": "External",
-			              "Agent": "PowerBI.VisualColumnRename"
-			            },
-			            "Weight": 0.9
-			          }
-			        }
-			      ]
+			      "State": "Generated"
 			    },
 			    "table_measures.total_revenue": {
 			      "Definition": {
@@ -8395,25 +8383,22 @@ culture en-GB
 			          "ConceptualProperty": "Total Revenue"
 			        }
 			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "Revenue": {
-			            "State": "Suggested",
-			            "Source": {
-			              "Type": "External",
-			              "Agent": "PowerBI.VisualColumnRename"
-			            },
-			            "Weight": 0.9
-			          }
-			        }
-			      ]
+			      "State": "Generated"
 			    },
 			    "table_measures.revenue_label": {
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
 			          "ConceptualProperty": "Revenue Label"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "table_measures.sales_label": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "_Measures",
+			          "ConceptualProperty": "Sales Label"
 			        }
 			      },
 			      "State": "Generated",
