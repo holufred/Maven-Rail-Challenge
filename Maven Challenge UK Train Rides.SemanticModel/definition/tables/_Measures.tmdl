@@ -9,40 +9,79 @@ table _Measures
 
 	measure 'Top Routes' = ```
 			
-			VAR _top =
+			VAR _TopTrips =
 			CALCULATE(
 			    [Journey Count],
 			    KEEPFILTERS(
 			        TOPN(
 			            [Top Routes Value],
-			            ALLSELECTED(DimRoute[Journey Route] ),
+			            ALLSELECTED(DimRoute[Route] ),
 			            CALCULATE([Journey Count], ALLSELECTED(DimRoute[Direction])),
 			            DESC,
 			            [Journey Count],
 			            DESC,
-			            DimRoute[Journey Route],
+			            DimRoute[Route],
 			            DESC
 			        )
 			    )
 			)
-			VAR _bottom=
+			VAR _BottomTrips=
 			CALCULATE(
 			    [Journey Count],
 			    KEEPFILTERS(
 			        TOPN(
 			            [Top Routes Value],
-			            ALLSELECTED(DimRoute[Journey Route], DimRoute[Direction]),
+			            ALLSELECTED(DimRoute[Route]),
 			            CALCULATE([Journey Count], ALLSELECTED(DimRoute[Direction])),
 			            ASC, 
 			            [Journey Count],
 			            ASC,                    
-			            DimRoute[Journey Route],
+			            DimRoute[Route],
+			            ASC
+			        )
+			    )
+			)
+			VAR _TopSales =
+			CALCULATE(
+			    [Ticket Sales],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            ALLSELECTED(DimRoute[Route] ),
+			            CALCULATE([Ticket Sales], ALLSELECTED(DimRoute[Direction])),
+			            DESC,
+			            [Ticket Sales],
+			            DESC,
+			            DimRoute[Route],
+			            DESC
+			        )
+			    )
+			)
+			
+			VAR _BottomSales=
+			CALCULATE(
+			    [Ticket Sales],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            ALLSELECTED(DimRoute[Route]),
+			            CALCULATE([Ticket Sales], ALLSELECTED(DimRoute[Direction])),
+			            ASC, 
+			            [Ticket Sales],
+			            ASC,                    
+			            DimRoute[Route],
 			            ASC
 			        )
 			    )
 			)
 			VAR _Result =
-			    IF(SELECTEDVALUE(TopBottom[Order]) ="Top", _top, _bottom)
+			    SWITCH(
+			        TRUE(),
+			        SELECTEDVALUE(TopBottom[Order]) = "Top" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Trips", _TopTrips,
+			        SELECTEDVALUE(TopBottom[Order]) = "Bottom" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Trips", _BottomTrips,
+			        SELECTEDVALUE(TopBottom[Order]) = "Top" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Ticket Sales", _TopSales,
+			        _BottomSales
+			    )
 			
 			RETURN
 			    _Result
@@ -214,7 +253,7 @@ table _Measures
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'Total Ticket Booked' =
+	measure 'Ticket Sales' =
 			
 			CALCULATE(SUM(Railway[Price]))
 		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
@@ -225,7 +264,7 @@ table _Measures
 	measure 'Total Ticket Refunded' =
 			
 			CALCULATE(
-			    [Total Ticket Booked],
+			    [Ticket Sales],
 			    DimJourney[Refund] = "Yes"
 			)
 		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
@@ -235,7 +274,7 @@ table _Measures
 
 	measure 'Total Ticket Net' =
 			
-			[Total Ticket Booked] - [Total Ticket Refunded]
+			[Ticket Sales] - [Total Ticket Refunded]
 		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
 		lineageTag: 43b6b411-e2af-425e-9955-427c592c7fc3
 
@@ -245,7 +284,7 @@ table _Measures
 			
 			VAR _Result =
 			AVERAGEX(
-			    VALUES(Railway[Transaction ID]),
+			    ALLSELECTED(Railway[Transaction ID]),
 			    SUM(Railway[Late Arrival Duration])
 			)
 			RETURN
@@ -352,7 +391,7 @@ table _Measures
 	measure 'PM Ticket Sales' =
 			
 			CALCULATE(
-			    [Total Ticket Booked],
+			    [Ticket Sales],
 			    DATEADD('Date'[Date], -1,MONTH)
 			)
 		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
@@ -364,8 +403,8 @@ table _Measures
 			
 			VAR up_arrow = UNICHAR(129137)
 			VAR down_arrow = UNICHAR(129139)
-			VAR _current = [Total Ticket Booked]
-			VAR _previous = CALCULATE([Total Ticket Booked], DATEADD('Date'[Date], -1,MONTH))
+			VAR _current = [Ticket Sales]
+			VAR _previous = CALCULATE([Ticket Sales], DATEADD('Date'[Date], -1,MONTH))
 			VAR _growth = DIVIDE (_current - _previous, _previous,0)
 			RETURN
 			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
@@ -444,8 +483,8 @@ table _Measures
 		lineageTag: 99ff6026-162b-4a76-a989-dca5b81e70f5
 
 	measure 'Percentage Colour (Ticket Sales)' =
-			VAR _current = [Total Ticket Booked]
-			VAR _previous = CALCULATE([Total Ticket Booked], DATEADD('Date'[Date], -1,MONTH))
+			VAR _current = [Ticket Sales]
+			VAR _previous = CALCULATE([Ticket Sales], DATEADD('Date'[Date], -1,MONTH))
 			VAR _growth = DIVIDE (_current - _previous, _previous,0)
 			RETURN
 			     IF( _growth <0, "red", "green")
@@ -472,14 +511,14 @@ table _Measures
 
 	measure 'Popular Route Chart Title' =
 			
-			COMBINEVALUES(" ", SELECTEDVALUE(TopBottom[Order]),[Top Routes Value], "Popular Routes")
+			COMBINEVALUES(" ", SELECTEDVALUE(TopBottom[Order]),[Top Routes Value], "Routes Ranked According to", SELECTEDVALUE('Rank Table'[Rank Option]))
 		lineageTag: 2d1f6e0b-bf2c-4063-9a70-2ae0b30c0dc2
 
 	measure 'Sales Label' =
 			
 			IF (
-			    [Total Ticket Booked]> [PM Ticket Sales],
-			    [Total Ticket Booked],
+			    [Ticket Sales]> [PM Ticket Sales],
+			    [Ticket Sales],
 			    [PM Ticket Sales]
 			)
 		formatString: 0
@@ -494,6 +533,97 @@ table _Measures
 			
 			COMBINEVALUES(" ", SELECTEDVALUE(TopBottom[Order]),[Top Routes Value], "Delayed Routes")
 		lineageTag: e101ef37-43c1-49d3-a1e4-e6503ab92d0e
+
+	measure 'Pareto %' =
+			
+			VAR _Trips =
+			    IF(
+			        ISINSCOPE(DimRoute[Route]),
+			        VAR _SelectedRoutes = ALLSELECTED(DimRoute[Route])
+			        VAR _RouteTable = ADDCOLUMNS(_SelectedRoutes,"Count",[Journey Count])
+			        VAR _CurrentCount = [Journey Count]
+			        VAR _CumulativeTable = FILTER(_RouteTable, [Count] >= _CurrentCount)
+			        VAR _CumulativeRouteCount = SUMX(_CumulativeTable,[Count])
+			        VAR _AllSelectedRouteCount = CALCULATE([Journey Count], REMOVEFILTERS(DimRoute[Route]))
+			        VAR _Percentage= DIVIDE(_CumulativeRouteCount, _AllSelectedRouteCount)
+			        RETURN
+			        _Percentage
+			    )
+			
+			VAR _Tickets =
+			    IF(
+			        ISINSCOPE(DimRoute[Route]),
+			        VAR _SelectedRoutes = ALLSELECTED(DimRoute[Route])
+			        VAR _RouteTable = ADDCOLUMNS(_SelectedRoutes,"Count",[Ticket Sales])
+			        VAR _CurrentCount = [Ticket Sales]
+			        VAR _CumulativeTable = FILTER(_RouteTable, [Count] >= _CurrentCount)
+			        VAR _CumulativeRouteCount = SUMX(_CumulativeTable,[Count])
+			        VAR _AllSelectedRouteCount = CALCULATE([Ticket Sales],REMOVEFILTERS(DimRoute[Route]))
+			        VAR _Percentage= DIVIDE(_CumulativeRouteCount, _AllSelectedRouteCount)
+			        RETURN
+			        _Percentage
+			)
+			VAR _Result =
+			    SWITCH(
+			        TRUE(),
+			        SELECTEDVALUE(TopBottom[Order]) ="Top" && SELECTEDVALUE('Rank Table'[Rank Option]) = "Number of Trips", _Trips,
+			        SELECTEDVALUE(TopBottom[Order]) ="Top" && SELECTEDVALUE('Rank Table'[Rank Option]) = "Ticket Sales", _Tickets,
+			        BLANK()
+			    )
+			RETURN
+			    _Result
+		formatString: 0%;-0%;0%
+		lineageTag: bc162dcd-7141-4c2d-81d2-944c94be82fd
+
+	measure 'Pareto CF' = ```
+			
+			SWITCH(
+			    TRUE(),
+			    SELECTEDVALUE(TopBottom[Order]) = "Bottom","#E3E9F8",
+			    [Pareto %] <= [Threshold Value], "#11183C", 
+			    [Pareto %] > [Threshold Value], "#E3E9F8",
+			    "#E3E9F8"
+			)
+			```
+		lineageTag: 26f07065-1015-48f5-8008-3afe90e15a97
+
+	measure 'Popular Chart Data Label' = ```
+			
+			  SWITCH(
+			        TRUE(),
+			        SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Trips", "0,0 Trips",
+			        "£,0"
+			    )
+			
+			```
+		lineageTag: fd91ce06-56a2-45f3-9747-bd02bd90364a
+
+	measure Label = IF([Ticket Sales] > [PM Ticket Sales], [Ticket Sales], [PM Ticket Sales])
+		formatString: "£"#,0;-"£"#,0;"£"#,0
+		lineageTag: b7360e2b-8161-40fc-8698-cad1d95fa0d7
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	measure 'Green Max' = IF([Ticket Sales] > [PM Ticket Sales], [Label])
+		formatString: 0
+		lineageTag: 42180540-ba0f-416a-9205-47da2e30dedc
+
+	measure 'Red Max' = IF([Ticket Sales] < [PM Ticket Sales], [Label])
+		formatString: 0
+		lineageTag: 1424ad0d-43bb-455a-8af6-0765c613ccc6
+
+	measure 'Average Days Booked In Advance' =
+			
+			CALCULATE(
+			    AVERAGEX(
+			        Railway,
+			        DATEDIFF(Railway[Date of Purchase], Railway[Date of Journey],DAY)
+			    ),
+			    USERELATIONSHIP('Date'[Date], Railway[Date of Purchase])
+			)
+		lineageTag: 6ae520f7-9085-40d9-a0f3-d206d506244a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	partition _Measures = m
 		mode: import

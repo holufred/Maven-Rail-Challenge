@@ -1,6 +1,7 @@
 model Model
 	culture: en-GB
 	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
 	sourceQueryCulture: en-US
 	dataAccessOptions
 		fastCombine
@@ -9,7 +10,7 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBIDesktopVersion = 2.128.1380.0 (24.04)
+annotation PBIDesktopVersion = 2.129.905.0 (24.05)
 
 annotation PBI_QueryOrder = ["Railway","Date","Time","DimStation","DimPayment","DimRailCard","DimTicket","DimJourney","DimRoute","_Measures"]
 
@@ -29,4 +30,8 @@ ref table DimRoute
 ref table 'Top Routes'
 ref table _Measures
 ref table TopBottom
+ref table Threshold
+ref table 'Rank Table'
+
+ref cultureInfo en-GB
 

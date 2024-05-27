@@ -1,4 +1,4 @@
-culture en-GB
+cultureInfo en-GB
 
 	linguisticMetadata =
 			{
@@ -6540,7 +6540,7 @@ culture en-GB
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
-			          "ConceptualProperty": "Total Ticket Booked"
+			          "ConceptualProperty": "Ticket Sales"
 			        }
 			      },
 			      "State": "Generated",

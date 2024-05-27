@@ -165,6 +165,31 @@
             "width": 234
           },
           "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2046.3229146069589,
+            "y": 273.72187215791251
+          },
+          "nodeIndex": "Threshold",
+          "nodeLineageTag": "b5ee9fd5-de70-4a15-aaec-150620de48b2",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2327.3229146069589,
+            "y": 285.72187215791251
+          },
+          "nodeIndex": "Rank Table",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
         }
       ],
       "name": "All tables",
