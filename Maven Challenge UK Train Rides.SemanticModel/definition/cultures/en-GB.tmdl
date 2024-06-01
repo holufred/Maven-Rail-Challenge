@@ -5660,7 +5660,7 @@ cultureInfo en-GB
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
-			          "ConceptualProperty": "Journey Count"
+			          "ConceptualProperty": "Trips"
 			        }
 			      },
 			      "State": "Generated",
@@ -7032,7 +7032,7 @@ cultureInfo en-GB
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
-			          "ConceptualProperty": "Cancelled Journeys"
+			          "ConceptualProperty": "Cancelled Trips"
 			        }
 			      },
 			      "State": "Generated",
@@ -7154,7 +7154,7 @@ cultureInfo en-GB
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
-			          "ConceptualProperty": "Delayed Journeys"
+			          "ConceptualProperty": "Delayed Trips"
 			        }
 			      },
 			      "State": "Generated",
@@ -7486,7 +7486,7 @@ cultureInfo en-GB
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
-			          "ConceptualProperty": "Refunded Journeys"
+			          "ConceptualProperty": "Refunded Trips"
 			        }
 			      },
 			      "State": "Generated",

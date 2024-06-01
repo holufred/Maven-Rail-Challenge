@@ -65,6 +65,17 @@ table Time
 
 		annotation PBI_FormatHint = {"isDateTimeCustom":true}
 
+	column 'Formatted Time'
+		dataType: string
+		lineageTag: d93fdb31-4052-49a8-bc0b-6bde7174178a
+		summarizeBy: none
+		sourceColumn: Formatted Time
+		sortByColumn: '1 hour time slot'
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
 	partition Time = m
 		mode: import
 		source =
@@ -80,9 +91,21 @@ table Time
 				    #"Changed Type2" = Table.TransformColumnTypes(#"Added Custom",{{"30 mins time slot", type time}}),
 				    #"Inserted Integer-Division1" = Table.AddColumn(#"Changed Type2", "1 hour bucket", each Number.IntegerDivide([Minutes], 60), Int64.Type),
 				    #"Added Custom1" = Table.AddColumn(#"Inserted Integer-Division1", "1 hour time slot", each [1 hour bucket]*60/1440),
-				    #"Changed Type3" = Table.TransformColumnTypes(#"Added Custom1",{{"1 hour time slot", type time}})
+				    #"Changed Type3" = Table.TransformColumnTypes(#"Added Custom1",{{"1 hour time slot", type time}}),
+				    #"Added Custom Column" = Table.AddColumn(#"Changed Type3", "Formatted Time", each
+				    let
+				        Hour = Time.Hour([1 hour time slot]),
+				        Minute = Time.Minute([1 hour time slot]),
+				        Second = Time.Second([1 hour time slot]),
+				        TwelveHour = if Hour = 0 then 12 else if Hour > 12 then Hour - 12 else Hour,
+				        AmPm = if Hour < 12 then "am" else "pm",
+				        FormattedMinuteSecond = if Minute = 0 and Second = 0 then "" else ":" & Text.PadStart(Text.From(Minute), 2, "0") & ":" & Text.PadStart(Text.From(Second), 2, "0")
+				    in
+				        Text.From(TwelveHour) & FormattedMinuteSecond & AmPm,
+				    type text),
+				    #"Filtered Rows" = Table.SelectRows(#"Added Custom Column", each true)
 				in
-				    #"Changed Type3"
+				    #"Filtered Rows"
 
 	annotation PBI_NavigationStepName = Navigation
 
