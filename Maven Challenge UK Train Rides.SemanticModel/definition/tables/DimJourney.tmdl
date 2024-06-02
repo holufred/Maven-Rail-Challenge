@@ -64,7 +64,5 @@ table DimJourney
 				in
 				    #"Added Conditional Column"
 
-	annotation PBI_NavigationStepName = Navigation
-
 	annotation PBI_ResultType = Table
 

@@ -152,16 +152,18 @@ table _Measures
 	measure 'Cancellation Percentage' = ```
 			
 			VAR CancelledJourneys = 
-			CALCULATE(
-			    COUNTROWS(Railway),
-			    DimJourney[Journey Status] = "Cancelled"
-			)
+			    CALCULATE(
+			        COUNTROWS(Railway),
+			        DimJourney[Journey Status] = "Cancelled"
+			    )
+			VAR _Result =
+			    DIVIDE(
+			        CancelledJourneys,
+			        [Trips],
+			        0
+			    )
 			RETURN
-			DIVIDE(
-			    CancelledJourneys,
-			    [Trips],
-			    0
-			)
+			    IF(ISBLANK(_Result), 0, _Result)
 			```
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 76983613-ff94-4d72-aec8-85b0bef68cda
@@ -189,16 +191,18 @@ table _Measures
 	measure 'Delayed Percentage' = ```
 			
 			VAR DelayedJourneys = 
-			CALCULATE(
-			    COUNTROWS(Railway),
-			    DimJourney[Journey Status] = "Delayed"
-			)
+			    CALCULATE(
+			        COUNTROWS(Railway),
+			        DimJourney[Journey Status] = "Delayed"
+			    )
+			VAR _Result =
+			    DIVIDE(
+			        DelayedJourneys,
+			        [Trips],
+			        0
+			    )
 			RETURN
-			DIVIDE(
-			    DelayedJourneys,
-			    [Trips],
-			    0
-			)
+			    IF(ISBLANK(_Result), 0, _Result)
 			```
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 38643d20-7fc8-4e05-b572-e3919fe2c211
@@ -271,34 +275,48 @@ table _Measures
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
 
-	measure 'Average Delay Time' =
+	measure 'Average Delay Time' = ```
 			
-			VAR _Result =
-			AVERAGEX(
-			    ALLSELECTED(Railway[Transaction ID]),
-			    SUM(Railway[Late Arrival Duration])
-			)
+			VAR _TotalDelays =
+			    CALCULATE(
+			        SUM(Railway[Late Arrival Duration]), 
+			        DimJourney[Journey Status] = "Delayed"
+			    )
+			VAR _CountDelays =
+			    CALCULATE(
+			        COUNTROWS(Railway), 
+			        DimJourney[Journey Status] = "Delayed"
+			
+			    )
 			RETURN
-			    IF(_Result = BLANK(), 0,_Result)
+			    IF(_CountDelays = 0, 0, DIVIDE(_TotalDelays, _CountDelays))
+			```
 		lineageTag: b8da3aee-4150-4dcb-b017-34520244b2ca
 
-		formatStringDefinition = "0 minutes"
+		formatStringDefinition = "0.0 minutes"
 
 	measure 'Cancelled Trips' =
 			
-			CALCULATE(
-			    COUNTROWS(Railway),
-			    DimJourney[Journey Status] = "Cancelled"
+			VAR _Result =
+			    CALCULATE(
+			        COUNTROWS(Railway),
+			        DimJourney[Journey Status] = "Cancelled"
 			)
+			
+			RETURN
+			    IF(ISBLANK(_Result), 0, _Result)
 		formatString: #,0
 		lineageTag: 6dd6cd97-d2e1-4c0e-90d4-397c4b207099
 
 	measure 'Delayed Trips' =
 			
+			VAR _Result =
 			CALCULATE(
 			    COUNTROWS(Railway),
 			    DimJourney[Journey Status] = "Delayed"
 			)
+			RETURN
+			    IF(ISBLANK(_Result), 0, _Result)
 		formatString: #,0
 		lineageTag: 795a85a6-0916-4423-8c88-95d9b3eadfc7
 
@@ -318,7 +336,7 @@ table _Measures
 			VAR _previous = [PM Trips]
 			VAR _growth = DIVIDE (_current - _previous, _previous,0)
 			RETURN
-			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+			    IF( _growth <0, FORMAT(_growth, "0.00%"), FORMAT(_growth, "0.00%"))
 		displayFolder: Percentage Difference
 		lineageTag: 84882774-b32c-409e-8236-3acace3422de
 
@@ -398,7 +416,7 @@ table _Measures
 			VAR _previous = CALCULATE([Ticket Sales], DATEADD('Date'[Date], -1,MONTH))
 			VAR _growth = DIVIDE (_current - _previous, _previous,0)
 			RETURN
-			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
+			    IF( _growth <0, FORMAT(_growth, "0.00%"), FORMAT(_growth, "0.00%"))
 		displayFolder: Percentage Difference
 		lineageTag: f0b35933-e9fe-4c9f-82f7-1ab2a9236e1c
 
@@ -525,54 +543,56 @@ table _Measures
 			COMBINEVALUES(" ", "Top",[Top Routes Value], "Routes with the Highest Number of Delayed Trips")
 		lineageTag: e101ef37-43c1-49d3-a1e4-e6503ab92d0e
 
-	measure 'Pareto %' =
+	measure 'Pareto %' = ```
 			
-			VAR _Trips =
-			    IF(
-			        ISINSCOPE(DimRoute[Route]) && SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Trips",
-			        VAR _SelectedRoutes = ALLSELECTED(DimRoute[Route])
-			        VAR _RouteTable = ADDCOLUMNS(_SelectedRoutes,"Count",[Trips])
-			        VAR _CurrentCount = [Trips]
-			        VAR _CumulativeTable = FILTER(_RouteTable, [Count] >= _CurrentCount)
-			        VAR _CumulativeRouteCount = SUMX(_CumulativeTable,[Count])
-			        VAR _AllSelectedRouteCount = CALCULATE([Trips], REMOVEFILTERS(DimRoute[Route]))
-			        VAR _Percentage= DIVIDE(_CumulativeRouteCount, _AllSelectedRouteCount)
-			        RETURN
-			        _Percentage
-			    )
-			
-			VAR _Tickets =
-			    IF(
-			        ISINSCOPE(DimRoute[Route]) && SELECTEDVALUE('Rank Table'[Rank Option]) ="Ticket Sales",
-			        VAR _SelectedRoutes = ALLSELECTED(DimRoute[Route])
-			        VAR _RouteTable = ADDCOLUMNS(_SelectedRoutes,"Count",[Ticket Sales])
-			        VAR _CurrentCount = [Ticket Sales]
-			        VAR _CumulativeTable = FILTER(_RouteTable, [Count] >= _CurrentCount)
-			        VAR _CumulativeRouteCount = SUMX(_CumulativeTable,[Count])
-			        VAR _AllSelectedRouteCount = CALCULATE([Ticket Sales],REMOVEFILTERS(DimRoute[Route]))
-			        VAR _Percentage= DIVIDE(_CumulativeRouteCount, _AllSelectedRouteCount)
-			        RETURN
-			        _Percentage
-			)
-			VAR _Result =
+			VAR _RankOption = SELECTEDVALUE('Rank Table'[Rank Option])
+			VAR _Order = SELECTEDVALUE(TopBottom[Order])
+			VAR _SelectedRoutes = ALLSELECTED(DimRoute[Route])
+			VAR _RouteTable = ADDCOLUMNS(
+			    _SelectedRoutes,
+			    "Count", 
 			    SWITCH(
-			        TRUE(),
-			        SELECTEDVALUE(TopBottom[Order]) ="Top" && SELECTEDVALUE('Rank Table'[Rank Option]) = "Number of Trips", _Trips,
-			        SELECTEDVALUE(TopBottom[Order]) ="Top" && SELECTEDVALUE('Rank Table'[Rank Option]) = "Ticket Sales", _Tickets,
+			        _RankOption,
+			        "Number of Trips", [Trips],
+			        "Ticket Sales", [Ticket Sales],
 			        BLANK()
 			    )
+			)
+			VAR _CurrentCount = SWITCH(
+			    _RankOption,
+			    "Number of Trips", [Trips],
+			    "Ticket Sales", [Ticket Sales],
+			    BLANK()
+			)
+			VAR _CumulativeTable = FILTER(_RouteTable, [Count] >= _CurrentCount)
+			VAR _CumulativeRouteCount = SUMX(_CumulativeTable, [Count])
+			VAR _AllSelectedRouteCount = CALCULATE(
+			    SWITCH(
+			        _RankOption,
+			        "Number of Trips", [Trips],
+			        "Ticket Sales", [Ticket Sales],
+			        BLANK()
+			    ),
+			    REMOVEFILTERS(DimRoute[Route])
+			)
+			VAR _Percentage = DIVIDE(_CumulativeRouteCount, _AllSelectedRouteCount)
 			RETURN
-			    _Result
-		formatString: 0%;-0%;0%
+			IF(_Order = "Top", _Percentage, BLANK())
+			```
 		lineageTag: bc162dcd-7141-4c2d-81d2-944c94be82fd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	measure 'Pareto CF' = ```
 			
+			VAR _Order = SELECTEDVALUE(TopBottom[Order])
+			VAR _RankOption = SELECTEDVALUE('Rank Table'[Rank Option])
+			VAR _Threshold = [Threshold Value]  
+			RETURN
 			SWITCH(
 			    TRUE(),
-			    SELECTEDVALUE(TopBottom[Order]) = "Bottom", "#E3E9F8",
-			    SELECTEDVALUE('Rank Table'[Rank Option]) = "Avg Revenue per Trip", "#E3E9F8",
-			    [Pareto %] <= [Threshold Value] , "#11183C",
+			    _Order = "Bottom" || _RankOption = "Avg Revenue per Trip", "#E3E9F8",
+			    NOT ISBLANK([Pareto %]) && [Pareto %] <= _Threshold, "#11183C",
 			    "#E3E9F8"
 			)
 			
@@ -604,16 +624,25 @@ table _Measures
 		formatString: 0
 		lineageTag: 1424ad0d-43bb-455a-8af6-0765c613ccc6
 
-	measure 'Average Days Booked In Advance' =
+	measure 'Average Days Booked In Advance' = ```
 			
-			CALCULATE(
-			    AVERAGEX(
-			        Railway,
-			        DATEDIFF(Railway[Date of Purchase], Railway[Date of Journey],DAY)
-			    ),
-			    USERELATIONSHIP('Date'[Date], Railway[Date of Purchase]),
-			    DimTicket[Ticket Class] = "Advance"
-			)
+			VAR _TotalDays =
+			    CALCULATE(
+			        SUMX(Railway,
+			            DATEDIFF('Railway'[Date of Purchase], Railway[Date of Journey],DAY)
+			        ),
+			        USERELATIONSHIP('Date'[Date], Railway[Date of Purchase]),
+			        DimTicket[Ticket Class] = "Advance"
+			    )
+			VAR _CountDays =
+			    CALCULATE(
+			        COUNTROWS(Railway), 
+			       DimTicket[Ticket Class] = "Advance"
+			
+			    )
+			RETURN
+			    IF(_CountDays = 0, 0, DIVIDE(_TotalDays, _CountDays))
+			```
 		lineageTag: 6ae520f7-9085-40d9-a0f3-d206d506244a
 
 		formatStringDefinition = "0.0 Days"
@@ -988,13 +1017,39 @@ table _Measures
 
 	measure 'Delay CF' =
 			
-			IF([Delayed Percentage] >0.5, "Red")
+			IF([Delayed Percentage] >0.3, "Red")
 		lineageTag: f4acc0cd-dfd6-4c9c-a7fe-2733e168e171
 
 	measure 'Cancellation CF' =
 			
-			IF([Cancellation Percentage] >0.5, "Red")
+			IF([Cancellation Percentage] >0.07, "Red")
 		lineageTag: 2c0c448f-8a50-4ef9-8a76-dc5c332e6b18
+
+	measure 'Dynamic Measure' = ```
+			
+			VAR SelectedMeasure = SELECTEDVALUE('Sorting Options'[Measure Name])
+			VAR SelectedOrder = SELECTEDVALUE('Sorting Order'[Order])
+			VAR MeasureValue =
+			    SWITCH(
+			        SelectedMeasure,
+			        "Trips", [Trips],
+			        "Cancelled Trips", [Cancelled Trips],
+			        "Delayed Trips", [Delayed Trips],
+			        "Cancelled %", [Cancellation Percentage],
+			        "Delayed %", [Delayed Percentage],
+			        "Avg Delay Time",[Average Delay Time],
+			        BLANK()
+			    )
+			RETURN
+			    IF(
+			        SelectedOrder = "⇩",
+			        MeasureValue,  
+			        -MeasureValue
+			    )
+			```
+		lineageTag: f722a31b-0950-40c3-819e-b0a056d02bf7
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	partition _Measures = m
 		mode: import

@@ -190,6 +190,30 @@
             "width": 234
           },
           "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2608.3229146069589,
+            "y": 285.72187215791251
+          },
+          "nodeIndex": "Sorting Options",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2889.3229146069589,
+            "y": 285.72187215791251
+          },
+          "nodeIndex": "Sorting Order",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
         }
       ],
       "name": "All tables",

@@ -10,7 +10,7 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBIDesktopVersion = 2.129.905.0 (24.05)
+annotation PBIDesktopVersion = 2.129.1229.0 (24.05)
 
 annotation PBI_QueryOrder = ["Railway","Date","Time","DimStation","DimPayment","DimRailCard","DimTicket","DimJourney","DimRoute","_Measures"]
 
@@ -32,6 +32,8 @@ ref table _Measures
 ref table TopBottom
 ref table Threshold
 ref table 'Rank Table'
+ref table 'Sorting Options'
+ref table 'Sorting Order'
 
 ref cultureInfo en-GB
 
