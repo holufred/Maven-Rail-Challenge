@@ -64,20 +64,6 @@
         },
         {
           "location": {
-            "x": 889.32291460695888,
-            "y": 586.72187215791246
-          },
-          "nodeIndex": "DimStation",
-          "nodeLineageTag": "4af48dde-6783-4db1-b3f7-8df9b525e908",
-          "size": {
-            "height": 104,
-            "width": 234
-          },
-          "zIndex": 5,
-          "expandedHeight": 104
-        },
-        {
-          "location": {
             "x": 13.382338524116477,
             "y": -10
           },

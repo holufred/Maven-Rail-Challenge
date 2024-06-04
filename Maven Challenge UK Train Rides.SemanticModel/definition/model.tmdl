@@ -12,7 +12,7 @@ annotation __PBI_TimeIntelligenceEnabled = 0
 
 annotation PBIDesktopVersion = 2.129.1229.0 (24.05)
 
-annotation PBI_QueryOrder = ["Railway","Date","Time","DimStation","DimPayment","DimRailCard","DimTicket","DimJourney","DimRoute","_Measures"]
+annotation PBI_QueryOrder = ["Railway","Date","Time","DimPayment","DimRailCard","DimTicket","DimJourney","DimRoute","_Measures"]
 
 annotation PBI_ProTooling = ["DevMode"]
 
@@ -21,7 +21,6 @@ annotation __TEdtr = 1
 ref table Railway
 ref table Date
 ref table Time
-ref table DimStation
 ref table DimPayment
 ref table DimRailCard
 ref table DimTicket

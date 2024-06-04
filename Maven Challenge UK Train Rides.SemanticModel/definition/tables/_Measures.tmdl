@@ -1,7 +1,7 @@
 table _Measures
 	lineageTag: 9de6a2ca-f66a-4e57-8498-7cc90ab61324
 
-	measure Trips =
+	measure Passengers =
 			
 			CALCULATE(COUNTROWS(Railway))
 		formatString: #,0
@@ -9,32 +9,32 @@ table _Measures
 
 	measure 'Top Routes' = ```
 			
-			VAR _TopTrips =
+			VAR _TopPassenger =
 			CALCULATE(
-			    [Trips],
+			    [Passengers],
 			    KEEPFILTERS(
 			        TOPN(
 			            [Top Routes Value],
 			            ALLSELECTED(DimRoute[Route] ),
-			            CALCULATE([Trips], ALLSELECTED(DimRoute[Direction])),
+			            CALCULATE([Passengers], ALLSELECTED(DimRoute[Direction])),
 			            DESC,
-			            [Trips],
+			            [Passengers],
 			            DESC,
 			            DimRoute[Route],
 			            DESC
 			        )
 			    )
 			)
-			VAR _BottomTrips=
+			VAR _BottomPassenger=
 			CALCULATE(
-			    [Trips],
+			    [Passengers],
 			    KEEPFILTERS(
 			        TOPN(
 			            [Top Routes Value],
 			            ALLSELECTED(DimRoute[Route]),
-			            CALCULATE([Trips], ALLSELECTED(DimRoute[Direction])),
+			            CALCULATE([Passengers], ALLSELECTED(DimRoute[Direction])),
 			            ASC, 
-			            [Trips],
+			            [Passengers],
 			            ASC,                    
 			            DimRoute[Route],
 			            ASC
@@ -107,15 +107,50 @@ table _Measures
 			        )
 			    )
 			)
+			VAR _TopTrips =
+			CALCULATE(
+			    [Number of Trips],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            ALLSELECTED(DimRoute[Route] ),
+			            CALCULATE([Number of Trips], ALLSELECTED(DimRoute[Direction])),
+			            DESC,
+			            [Number of Trips],
+			            DESC,
+			            DimRoute[Route],
+			            DESC
+			        )
+			    )
+			)
+			
+			VAR _BottomTrips=
+			CALCULATE(
+			    [Number of Trips],
+			    KEEPFILTERS(
+			        TOPN(
+			            [Top Routes Value],
+			            ALLSELECTED(DimRoute[Route]),
+			            CALCULATE([Number of Trips], ALLSELECTED(DimRoute[Direction])),
+			            ASC, 
+			            [Number of Trips],
+			            ASC,                    
+			            DimRoute[Route],
+			            ASC
+			        )
+			    )
+			)
 			VAR _Result =
 			    SWITCH(
 			        TRUE(),
-			        SELECTEDVALUE(TopBottom[Order]) = "Top" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Trips", _TopTrips,
-			        SELECTEDVALUE(TopBottom[Order]) = "Bottom" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Trips", _BottomTrips,
+			        SELECTEDVALUE(TopBottom[Order]) = "Top" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Passengers", _TopPassenger,
+			        SELECTEDVALUE(TopBottom[Order]) = "Bottom" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Passenger", _BottomPassenger,
 			        SELECTEDVALUE(TopBottom[Order]) = "Top" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Ticket Sales", _TopSales,
 			        SELECTEDVALUE(TopBottom[Order]) = "Bottom" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Ticket Sales", _BottomSales,
 			        SELECTEDVALUE(TopBottom[Order]) = "Top" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Avg Revenue per Trip", _TopRevenue,
-			        _BottomRevenue
+			        SELECTEDVALUE(TopBottom[Order]) = "Bottom" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Avg Revenue per Trip", _BottomRevenue,
+			       SELECTEDVALUE(TopBottom[Order]) = "Top" && SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Trips", _TopTrips,
+			       _BottomTrips
 			    )
 			
 			RETURN
@@ -128,7 +163,7 @@ table _Measures
 	measure 'Peak Travel Times' =
 			
 			CALCULATE(
-			    [Trips],
+			    [Passengers],
 			    USERELATIONSHIP('Time'[Time to the Minute], Railway[Departure Time])
 			)
 		formatString: 0
@@ -149,22 +184,16 @@ table _Measures
 			```
 		lineageTag: 9996f139-37c6-46fb-aeb2-35cf6f1f3778
 
-	measure 'Cancellation Percentage' = ```
+	measure 'Cancellation Percentage' =
 			
-			VAR CancelledJourneys = 
-			    CALCULATE(
-			        COUNTROWS(Railway),
-			        DimJourney[Journey Status] = "Cancelled"
-			    )
 			VAR _Result =
 			    DIVIDE(
-			        CancelledJourneys,
-			        [Trips],
+			       [Cancelled Trips],
+			        [Number of Trips],
 			        0
 			    )
 			RETURN
 			    IF(ISBLANK(_Result), 0, _Result)
-			```
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 76983613-ff94-4d72-aec8-85b0bef68cda
 
@@ -188,22 +217,16 @@ table _Measures
 		formatString: 0%;-0%;0%
 		lineageTag: 57e788ea-3dbc-4eed-9ee7-fc92e723705f
 
-	measure 'Delayed Percentage' = ```
+	measure 'Delayed Percentage' =
 			
-			VAR DelayedJourneys = 
-			    CALCULATE(
-			        COUNTROWS(Railway),
-			        DimJourney[Journey Status] = "Delayed"
-			    )
 			VAR _Result =
 			    DIVIDE(
-			        DelayedJourneys,
-			        [Trips],
+			        [Delayed Trips],
+			        [Number of Trips],
 			        0
 			    )
 			RETURN
 			    IF(ISBLANK(_Result), 0, _Result)
-			```
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 38643d20-7fc8-4e05-b572-e3919fe2c211
 
@@ -231,7 +254,7 @@ table _Measures
 			
 			AVERAGEX(
 			    VALUES('Date'[Date]),
-			    [Trips]
+			    [Passengers]
 			)
 		formatString: 0
 		lineageTag: c4b790da-a3c4-4b83-b193-e782488c2b92
@@ -242,7 +265,7 @@ table _Measures
 			
 			AVERAGEX(
 			    VALUES('Time'[Time to the Minute]),
-			    [Trips]
+			    [Passengers]
 			)
 		lineageTag: cd4c2fe2-acd5-4e99-90c8-33f061d5aa20
 
@@ -275,65 +298,81 @@ table _Measures
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
 
-	measure 'Average Delay Time' = ```
+	measure 'Average Delay Time' =
 			
-			VAR _TotalDelays =
-			    CALCULATE(
-			        SUM(Railway[Late Arrival Duration]), 
+			VAR _TripTable =
+			   CALCULATETABLE(
+			        SUMMARIZE(
+			            FILTER(Railway, Railway[Late Arrival Duration] >0),
+			            Railway[Route],
+			            Railway[Date of Journey],
+			            Railway[Departure Time],
+			            "DelayTime", MAX(Railway[Late Arrival Duration])
+			        ),
 			        DimJourney[Journey Status] = "Delayed"
 			    )
-			VAR _CountDelays =
-			    CALCULATE(
-			        COUNTROWS(Railway), 
-			        DimJourney[Journey Status] = "Delayed"
+			VAR _Result = AVERAGEX(_TripTable,[DelayTime])
 			
-			    )
 			RETURN
-			    IF(_CountDelays = 0, 0, DIVIDE(_TotalDelays, _CountDelays))
-			```
+			    IF(ISBLANK(_Result), 0, _Result)
 		lineageTag: b8da3aee-4150-4dcb-b017-34520244b2ca
 
 		formatStringDefinition = "0.0 minutes"
 
 	measure 'Cancelled Trips' =
 			
-			VAR _Result =
-			    CALCULATE(
-			        COUNTROWS(Railway),
+			VAR _TripTable =
+			   CALCULATETABLE(
+			        SUMMARIZE(
+			            Railway,
+			            Railway[Route],
+			            Railway[Date of Journey],
+			            Railway[Departure Time],
+			            "CancelledTrips", COUNTROWS(Railway)
+			        ),
 			        DimJourney[Journey Status] = "Cancelled"
-			)
+			    )
+			VAR _Result = COUNTROWS(_TripTable)
 			
 			RETURN
 			    IF(ISBLANK(_Result), 0, _Result)
-		formatString: #,0
+		formatString: 0
 		lineageTag: 6dd6cd97-d2e1-4c0e-90d4-397c4b207099
 
 	measure 'Delayed Trips' =
 			
-			VAR _Result =
-			CALCULATE(
-			    COUNTROWS(Railway),
-			    DimJourney[Journey Status] = "Delayed"
-			)
+			VAR _TripTable =
+			   CALCULATETABLE(
+			        SUMMARIZE(
+			            Railway,
+			            Railway[Route],
+			            Railway[Date of Journey],
+			            Railway[Departure Time],
+			            "DelayedTrips", COUNTROWS(Railway)
+			        ),
+			        DimJourney[Journey Status] = "Delayed"
+			    )
+			VAR _Result = COUNTROWS(_TripTable)
+			
 			RETURN
 			    IF(ISBLANK(_Result), 0, _Result)
 		formatString: #,0
 		lineageTag: 795a85a6-0916-4423-8c88-95d9b3eadfc7
 
-	measure 'PM Trips' =
+	measure 'PM Passengers' =
 			
 			CALCULATE(
-			    [Trips],
+			    [Passengers],
 			    DATEADD('Date'[Date], -1,MONTH))
 		formatString: #,0
 		lineageTag: 6031f9a8-35c4-4da0-bae2-c7b150f2dfd2
 
-	measure 'Percentage Difference (Trips)' =
+	measure 'Percentage Difference (Passenger)' =
 			
 			VAR up_arrow = UNICHAR(129137)
 			VAR down_arrow = UNICHAR(129139)
-			VAR _current = [Trips]
-			VAR _previous = [PM Trips]
+			VAR _current = [Passengers]
+			VAR _previous = [PM Passengers]
 			VAR _growth = DIVIDE (_current - _previous, _previous,0)
 			RETURN
 			    IF( _growth <0, FORMAT(_growth, "0.00%"), FORMAT(_growth, "0.00%"))
@@ -376,7 +415,8 @@ table _Measures
 		displayFolder: Percentage Difference
 		lineageTag: b07266a1-b718-4d48-82ca-45423c1374b9
 
-	measure 'Refunded Trips' =
+	measure 'Passengers Refunded' =
+			
 			
 			CALCULATE(
 			    COUNTROWS(Railway),
@@ -389,8 +429,8 @@ table _Measures
 			
 			VAR up_arrow = UNICHAR(129137)
 			VAR down_arrow = UNICHAR(129139)
-			VAR _current = [Refunded Trips]
-			VAR _previous = CALCULATE([Refunded Trips], DATEADD('Date'[Date], -1,MONTH))
+			VAR _current = [Passengers Refunded]
+			VAR _previous = CALCULATE([Passengers Refunded], DATEADD('Date'[Date], -1,MONTH))
 			VAR _growth = DIVIDE (_current - _previous, _previous,0)
 			RETURN
 			    IF( _growth <0, down_arrow & " " &  FORMAT(_growth, "0.00%"), up_arrow & " " &  FORMAT(_growth, "0.00%"))
@@ -446,8 +486,8 @@ table _Measures
 
 	measure 'Percentage Colour (Trips)' =
 			
-			VAR _current = [Trips]
-			VAR _previous = [PM Trips]
+			VAR _current = [Passengers]
+			VAR _previous = [PM Passengers]
 			VAR _growth = DIVIDE (_current - _previous, _previous,0)
 			RETURN
 			    IF( _growth <0, "red", "green")
@@ -483,8 +523,8 @@ table _Measures
 		lineageTag: f76fe76d-6a5c-419f-b81b-97dbc9062db6
 
 	measure 'Percentage Colour (Refunded Journey)' =
-			VAR _current = [Refunded Trips]
-			VAR _previous = CALCULATE([Refunded Trips], DATEADD('Date'[Date], -1,MONTH))
+			VAR _current = [Passengers Refunded]
+			VAR _previous = CALCULATE([Passengers Refunded], DATEADD('Date'[Date], -1,MONTH))
 			VAR _growth = DIVIDE (_current - _previous, _previous,0)
 			RETURN
 			     IF( _growth <0, "red", "green")
@@ -545,49 +585,106 @@ table _Measures
 
 	measure 'Pareto %' = ```
 			
+			// VAR _RankOption = SELECTEDVALUE('Rank Table'[Rank Option])
+			// VAR _Order = SELECTEDVALUE(TopBottom[Order])
+			// VAR _SelectedRoutes = ALLSELECTED(DimRoute[Route])
+			// VAR _RouteTable = ADDCOLUMNS(
+			//     _SelectedRoutes,
+			//     "Count", 
+			//     SWITCH(
+			//         _RankOption,
+			//         "Ticket Sales", [Ticket Sales],
+			//         "Number of Passengers", [Passengers],
+			//         "Number of Trips", [Number of Trips],
+			//         BLANK()
+			//     )
+			// )
+			// VAR _CurrentCount = SWITCH(
+			//     _RankOption,
+			//     "Ticket Sales", [Ticket Sales],
+			//     "Number of Passengers", [Passengers],
+			//     "Number of Trips", [Number of Trips],
+			//     BLANK()
+			// )
+			// VAR _CumulativeTable = FILTER(_RouteTable, [Count] >= _CurrentCount)
+			// VAR _CumulativeRouteCount = SUMX(_CumulativeTable, [Count])
+			// VAR _AllSelectedRouteCount = CALCULATE(
+			//     SWITCH(
+			//         _RankOption,
+			//         "Ticket Sales", [Ticket Sales],
+			//         "Number of Passengers", [Passengers],       
+			//         "Number of Trips",[Number of Trips],
+			//         BLANK()
+			//     ),
+			//     REMOVEFILTERS(DimRoute[Route])
+			// )
+			// VAR _Percentage = DIVIDE(_CumulativeRouteCount, _AllSelectedRouteCount,0)
+			// RETURN
+			// IF(_Order = "Top", _Percentage, BLANK())
+			
+			
 			VAR _RankOption = SELECTEDVALUE('Rank Table'[Rank Option])
 			VAR _Order = SELECTEDVALUE(TopBottom[Order])
 			VAR _SelectedRoutes = ALLSELECTED(DimRoute[Route])
-			VAR _RouteTable = ADDCOLUMNS(
+			VAR _CurrentRoute =SELECTEDVALUE(DimRoute[Route])
+			VAR _RouteTable = 
+			ADDCOLUMNS(
 			    _SelectedRoutes,
-			    "Count", 
+			    "@Count", 
 			    SWITCH(
 			        _RankOption,
-			        "Number of Trips", [Trips],
 			        "Ticket Sales", [Ticket Sales],
+			        "Number of Passengers", [Passengers],
+			        "Number of Trips", [Number of Trips],
 			        BLANK()
+			    ),
+			    "@Rank", 
+			    RANKX(
+			        _SelectedRoutes,
+			        SWITCH(
+			        _RankOption,
+			        "Ticket Sales", [Ticket Sales],
+			        "Number of Passengers", [Passengers],
+			        "Number of Trips", [Number of Trips],
+			        BLANK()
+			        )
 			    )
+			    +
+			    RANKX(
+			        _SelectedRoutes,
+			       DimRoute[Route]
+			    )/100000
 			)
-			VAR _CurrentCount = SWITCH(
-			    _RankOption,
-			    "Number of Trips", [Trips],
-			    "Ticket Sales", [Ticket Sales],
-			    BLANK()
-			)
-			VAR _CumulativeTable = FILTER(_RouteTable, [Count] >= _CurrentCount)
-			VAR _CumulativeRouteCount = SUMX(_CumulativeTable, [Count])
-			VAR _AllSelectedRouteCount = CALCULATE(
+			VAR _SelectedRoutePosition = MAXX(FILTER(_RouteTable, DimRoute[Route] = _CurrentRoute), [@Rank])
+			VAR _CumulativeRouteCount = SUMX(FILTER(_RouteTable, [@Rank] <= _SelectedRoutePosition), [@Count])
+			VAR _AllSelectedRouteCount = 
+			CALCULATE(
 			    SWITCH(
 			        _RankOption,
-			        "Number of Trips", [Trips],
 			        "Ticket Sales", [Ticket Sales],
+			        "Number of Passengers", [Passengers],       
+			        "Number of Trips",[Number of Trips],
 			        BLANK()
 			    ),
 			    REMOVEFILTERS(DimRoute[Route])
 			)
-			VAR _Percentage = DIVIDE(_CumulativeRouteCount, _AllSelectedRouteCount)
+			VAR _Percentage = DIVIDE(_CumulativeRouteCount, _AllSelectedRouteCount,0)
 			RETURN
 			IF(_Order = "Top", _Percentage, BLANK())
+			
+			
+			
 			```
+		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: bc162dcd-7141-4c2d-81d2-944c94be82fd
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	measure 'Pareto CF' = ```
 			
 			VAR _Order = SELECTEDVALUE(TopBottom[Order])
 			VAR _RankOption = SELECTEDVALUE('Rank Table'[Rank Option])
-			VAR _Threshold = [Threshold Value]  
+			VAR _Threshold = [Threshold Value]
+			VAR _Route = SELECTEDVALUE(DimRoute[Route])
+			
 			RETURN
 			SWITCH(
 			    TRUE(),
@@ -596,6 +693,7 @@ table _Measures
 			    "#E3E9F8"
 			)
 			
+			
 			```
 		lineageTag: 26f07065-1015-48f5-8008-3afe90e15a97
 
@@ -603,6 +701,7 @@ table _Measures
 			
 			  SWITCH(
 			        TRUE(),
+			        SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Passengers", "0,0 People",
 			        SELECTEDVALUE('Rank Table'[Rank Option]) ="Number of Trips", "0,0 Trips",
 			        "£,0"
 			    )
@@ -832,18 +931,18 @@ table _Measures
 	measure 'Trip Label' =
 			
 			IF (
-			    [Trips]> [PM Trips],
-			    [Trips],
-			    [PM Trips]
+			    [Passengers]> [PM Passengers],
+			    [Passengers],
+			    [PM Passengers]
 			)
 		formatString: 0
 		lineageTag: 4cf51ae9-53b7-4fc9-82ff-3d4e157296a7
 
-	measure 'Trips Green Max' = IF([Trips] > [PM Trips], [Trip Label])
+	measure 'Trips Green Max' = IF([Passengers] > [PM Passengers], [Trip Label])
 		formatString: 0
 		lineageTag: f6cc8cbc-06b7-4bdc-b05b-7b74f948d967
 
-	measure 'Trips Red Max' = IF([Trips] < [PM Trips], [Trip Label])
+	measure 'Trips Red Max' = IF([Passengers] < [PM Passengers], [Trip Label])
 		formatString: 0
 		lineageTag: 3edc87a5-66ba-4e0c-8ff2-423e7b6f8b6f
 
@@ -883,12 +982,12 @@ table _Measures
 			
 			VAR _Result =
 			    IF(
-			        [Trips] > [PM Trips], 
+			        [Passengers] > [PM Passengers], 
 			        [Trips Delta PM Line] + 
 			        (
 			            DIVIDE(
-			                ([Trips] - [PM Trips]), 
-			                [PM Trips]
+			                ([Passengers] - [PM Passengers]), 
+			                [PM Passengers]
 			            )*
 			            (DIVIDE(
 			                [Trips_Monthly_Max],
@@ -896,8 +995,8 @@ table _Measures
 			                    MAXX(
 			                        ALLSELECTED('Date'[Month]),
 			                        DIVIDE(
-			                            ([Trips] - [PM Trips]), 
-			                            [PM Trips]
+			                            ([Passengers] - [PM Passengers]), 
+			                            [PM Passengers]
 			                        )
 			                    ),
 			                    REMOVEFILTERS('Date'[Month Name])
@@ -918,12 +1017,12 @@ table _Measures
 			
 			VAR _Result =
 			    IF(
-			        [Trips] < [PM Trips], 
+			        [Passengers] < [PM Passengers], 
 			        [Trips Delta PM Line] + 
 			        (
 			            DIVIDE(
-			                ([Trips] - [PM Trips]), 
-			                [PM Trips]
+			                ([Passengers] - [PM Passengers]), 
+			                [PM Passengers]
 			            )*
 			            (DIVIDE(
 			                [Trips_Monthly_Max],
@@ -931,8 +1030,8 @@ table _Measures
 			                    MAXX(
 			                        ALLSELECTED('Date'[Month]),
 			                        DIVIDE(
-			                            ([Trips] - [PM Trips]), 
-			                            [PM Trips]
+			                            ([Passengers] - [PM Passengers]), 
+			                            [PM Passengers]
 			                        )
 			                    ),
 			                    REMOVEFILTERS('Date'[Month Name])
@@ -953,13 +1052,13 @@ table _Measures
 			
 			VAR _Result =
 			    IF(
-			        [Trips] < [PM Trips], 
+			        [Passengers] < [PM Passengers], 
 			        ([Trips Delta PM Line] *0.88)
 			            + 
 			        (
 			            DIVIDE(
-			                ([Trips] - [PM Trips]), 
-			                [PM Trips]
+			                ([Passengers] - [PM Passengers]), 
+			                [PM Passengers]
 			            )*
 			            (DIVIDE(
 			                [Trips_Monthly_Max],
@@ -967,8 +1066,8 @@ table _Measures
 			                    MAXX(
 			                        ALLSELECTED('Date'[Month]),
 			                        DIVIDE(
-			                            ([Trips] - [PM Trips]), 
-			                            [PM Trips]
+			                            ([Passengers] - [PM Passengers]), 
+			                            [PM Passengers]
 			                        )
 			                    ),
 			                    REMOVEFILTERS('Date'[Month Name])
@@ -981,8 +1080,8 @@ table _Measures
 			            + 
 			        (
 			            DIVIDE(
-			                ([Trips] - [PM Trips]), 
-			                [PM Trips]
+			                ([Passengers] - [PM Passengers]), 
+			                [PM Passengers]
 			            )*
 			            (DIVIDE(
 			                [Trips_Monthly_Max],
@@ -990,8 +1089,8 @@ table _Measures
 			                    MAXX(
 			                        ALLSELECTED('Date'[Month]),
 			                        DIVIDE(
-			                            ([Trips] - [PM Trips]), 
-			                            [PM Trips]
+			                            ([Passengers] - [PM Passengers]), 
+			                            [PM Passengers]
 			                        )
 			                    ),
 			                    REMOVEFILTERS('Date'[Month Name])
@@ -1032,7 +1131,7 @@ table _Measures
 			VAR MeasureValue =
 			    SWITCH(
 			        SelectedMeasure,
-			        "Trips", [Trips],
+			        "Trips", [Number of Trips],
 			        "Cancelled Trips", [Cancelled Trips],
 			        "Delayed Trips", [Delayed Trips],
 			        "Cancelled %", [Cancellation Percentage],
@@ -1050,6 +1149,41 @@ table _Measures
 		lineageTag: f722a31b-0950-40c3-819e-b0a056d02bf7
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Number of Trips' = ```
+			
+			VAR _TripTable =
+			    SUMMARIZE(
+			        Railway,
+			        Railway[Date of Journey],
+			        Railway[Departure Time],
+			        Railway[Route],
+			        "Cost",SUM(Railway[Price])
+			    )
+			RETURN 
+			 COUNTROWS(_TripTable)
+			```
+		formatString: #,0
+		lineageTag: bc87cef5-1705-4303-ba06-02cf0b592c80
+
+	measure 'Average Passengers per Trip' =
+			
+			VAR _TripTable =
+			    SUMMARIZE(
+			        Railway,
+			        Railway[Date of Journey],
+			        Railway[Departure Time],
+			        Railway[Route],
+			        "Count", COUNTROWS(Railway)
+			    )
+			VAR _Result =
+			    DIVIDE(SUMX(_TripTable, [Count]), COUNTROWS(_TripTable))
+			RETURN
+			    _Result
+		formatString: 0
+		lineageTag: 3673e2c0-b60d-458e-aa07-68fd8f5c9b4a
+
+		annotation PBI_FormatHint = {"isDecimal":true}
 
 	partition _Measures = m
 		mode: import

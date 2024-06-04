@@ -2865,231 +2865,6 @@ cultureInfo en-GB
 			      ],
 			      "SemanticType": "Time"
 			    },
-			    "dim_station": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "DimStation"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "dim station": {
-			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "DimStation": {
-			            "Type": "Noun",
-			            "State": "Generated",
-			            "Weight": 0.99
-			          }
-			        },
-			        {
-			          "dim location": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.5
-			          }
-			        },
-			        {
-			          "dim situation": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.5
-			          }
-			        },
-			        {
-			          "dim status": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.5
-			          }
-			        },
-			        {
-			          "dim position": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.485
-			          }
-			        },
-			        {
-			          "dim place": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.485
-			          }
-			        },
-			        {
-			          "dim post": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.485
-			          }
-			        },
-			        {
-			          "dim posting": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.485
-			          }
-			        },
-			        {
-			          "dim class": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.485
-			          }
-			        },
-			        {
-			          "dim rank": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.485
-			          }
-			        },
-			        {
-			          "dim level": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.485
-			          }
-			        }
-			      ]
-			    },
-			    "dim_station.station": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "DimStation",
-			          "ConceptualProperty": "Station"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "station": {
-			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "address": {
-			            "State": "Generated",
-			            "Weight": 0.7
-			          }
-			        },
-			        {
-			          "location": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.491
-			          }
-			        },
-			        {
-			          "situation": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.491
-			          }
-			        },
-			        {
-			          "position": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.476
-			          }
-			        },
-			        {
-			          "place": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.476
-			          }
-			        },
-			        {
-			          "post": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.476
-			          }
-			        },
-			        {
-			          "posting": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.476
-			          }
-			        },
-			        {
-			          "level": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.476
-			          }
-			        },
-			        {
-			          "standing": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.476
-			          }
-			        }
-			      ],
-			      "SemanticType": "Location"
-			    },
 			    "dim_payment": {
 			      "Definition": {
 			        "Binding": {
@@ -5660,7 +5435,7 @@ cultureInfo en-GB
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
-			          "ConceptualProperty": "Trips"
+			          "ConceptualProperty": "Passengers"
 			        }
 			      },
 			      "State": "Generated",
@@ -7276,7 +7051,7 @@ cultureInfo en-GB
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
-			          "ConceptualProperty": "PM Trips"
+			          "ConceptualProperty": "PM Passengers"
 			        }
 			      },
 			      "State": "Generated",
@@ -7398,7 +7173,7 @@ cultureInfo en-GB
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
-			          "ConceptualProperty": "Percentage Difference (Trips)"
+			          "ConceptualProperty": "Percentage Difference (Passenger)"
 			        }
 			      },
 			      "State": "Generated",
@@ -7486,7 +7261,7 @@ cultureInfo en-GB
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "_Measures",
-			          "ConceptualProperty": "Refunded Trips"
+			          "ConceptualProperty": "Passengers Refunded"
 			        }
 			      },
 			      "State": "Generated",
@@ -8716,51 +8491,6 @@ cultureInfo en-GB
 			        }
 			      ]
 			    },
-			    "dim_station_in_station": {
-			      "Binding": {
-			        "ConceptualEntity": "DimStation"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "dim_station": {
-			          "Target": {
-			            "Entity": "dim_station"
-			          }
-			        },
-			        "dim_station.station": {
-			          "Target": {
-			            "Entity": "dim_station.station"
-			          }
-			        }
-			      },
-			      "SemanticSlots": {
-			        "Where": {
-			          "Role": "dim_station.station"
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Preposition": {
-			            "Subject": {
-			              "Role": "dim_station"
-			            },
-			            "Prepositions": [
-			              {
-			                "in": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Object": {
-			              "Role": "dim_station.station"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dim_stations_are_in_stations"
-			        }
-			      ]
-			    },
 			    "dim_route_in_journey_route": {
 			      "Binding": {
 			        "ConceptualEntity": "DimRoute"
@@ -9529,39 +9259,6 @@ cultureInfo en-GB
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "times_have_1_hour_time_slots"
-			        }
-			      ]
-			    },
-			    "dim_station_has_station": {
-			      "Binding": {
-			        "ConceptualEntity": "DimStation"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "dim_station": {
-			          "Target": {
-			            "Entity": "dim_station"
-			          }
-			        },
-			        "dim_station.station": {
-			          "Target": {
-			            "Entity": "dim_station.station"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "dim_station"
-			            },
-			            "Object": {
-			              "Role": "dim_station.station"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dim_stations_have_stations"
 			        }
 			      ]
 			    },

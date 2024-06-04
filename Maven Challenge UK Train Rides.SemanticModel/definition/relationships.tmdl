@@ -18,15 +18,6 @@ relationship AutoDetected_5edc2a51-a71f-49a9-b012-8e91ecd52698
 	fromColumn: Railway.Route
 	toColumn: DimRoute.Route
 
-relationship 231b3918-24df-4b1f-b188-90f8d50bdfd3
-	fromColumn: Railway.'Departure Station'
-	toColumn: DimStation.Station
-
-relationship 131860cb-1d08-46b1-bf7a-5938358edf31
-	isActive: false
-	fromColumn: Railway.'Arrival Destination'
-	toColumn: DimStation.Station
-
 relationship 8767aecf-d93a-4fc3-9700-153084c3a338
 	isActive: false
 	fromColumn: Railway.'Time of Purchase'

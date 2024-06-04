@@ -12,7 +12,7 @@ table 'Rank Table'
 
 	partition 'Rank Table' = calculated
 		mode: import
-		source = {"Number of Trips", "Ticket Sales", "Avg Revenue per Trip"}
+		source = {"Number of Passengers", "Ticket Sales", "Avg Revenue per Trip", "Number of Trips"}
 
 	annotation PBI_Id = b90187e5c8cf48ac80147d42239bee89
 

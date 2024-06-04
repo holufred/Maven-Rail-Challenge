@@ -22,7 +22,7 @@ table Threshold
 
 	partition Threshold = calculated
 		mode: import
-		source = GENERATESERIES(0.01, 1.002, 0.01)
+		source = GENERATESERIES(0.00, 1.002, 0.01)
 
 	annotation PBI_Id = 186d67ce5f9946cd931828b41439592f
 
